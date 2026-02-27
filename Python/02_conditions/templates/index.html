@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>02 – Conditions</title>
+  <style>
+    body        { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    .container  { max-width: 700px; margin: auto; background: #fff; padding: 30px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h1          { color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 10px; }
+    label       { display: block; margin-top: 12px; font-weight: bold; color: #333; }
+    input[type="number"] { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .checkbox-row { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+    button      { margin-top: 20px; padding: 10px 24px; background: #e67e22; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #d35400; }
+    .concept    { background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 12px; margin-bottom: 20px; font-size: 0.9rem; }
+    .checks     { margin-top: 25px; }
+    .check-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 8px; border-radius: 4px; border: 1px solid #ddd; }
+    .check-item.ok   { background: #d4edda; border-color: #c3e6cb; }
+    .check-item.fail { background: #f8d7da; border-color: #f5c6cb; }
+    .icon       { font-size: 1.2rem; }
+    .check-name { font-weight: bold; min-width: 130px; color: #333; }
+    .check-msg  { color: #555; font-size: 0.9rem; }
+    .verdict    { margin-top: 20px; padding: 15px 20px; border-radius: 5px; font-size: 1.1rem; font-weight: bold; text-align: center; }
+    .verdict.approved { background: #d4edda; color: #155724; border: 2px solid #28a745; }
+    .verdict.rejected { background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
+    .type-note  { font-size: 0.78rem; color: #888; margin-left: 6px; font-weight: normal; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Python Project 02 — Conditions</h1>
+
+  <div class="concept">
+    <strong>Concepts shown:</strong>
+    <code>if</code>, <code>elif</code>, <code>else</code>, <code>and</code>, <code>or</code>, <code>not</code> — job & benefit eligibility checker.
+  </div>
+
+  <form method="POST">
+    <label>Age <span class="type-note">→ if / elif / else</span>
+      <input type="number" name="age" value="{{ form_data.age or 25 }}" min="1" max="100" required />
+    </label>
+
+    <label>Annual Income (₹) <span class="type-note">→ elif chain</span>
+      <input type="number" name="income" value="{{ form_data.income or 50000 }}" min="0" required />
+    </label>
+
+    <label>Years of Experience <span class="type-note">→ and / or condition</span>
+      <input type="number" name="experience" value="{{ form_data.experience or 3 }}" min="0" max="50" required />
+    </label>
+
+    <div class="checkbox-row">
+      <input type="checkbox" name="has_degree" id="has_degree"
+        {% if form_data.has_degree %}checked{% endif %} />
+      <label for="has_degree" style="margin:0;">Has a degree? <span class="type-note">→ bool in condition</span></label>
+    </div>
+
+    <button type="submit">Check Eligibility</button>
+  </form>
+
+  {% if results %}
+  <div class="checks">
+    {% for item in results %}
+    <div class="check-item {{ 'ok' if item.ok else 'fail' }}">
+      <span class="icon">{{ '✔' if item.ok else '✘' }}</span>
+      <span class="check-name">{{ item.check }}</span>
+      <span class="check-msg">{{ item.status }}</span>
+    </div>
+    {% endfor %}
+
+    <div class="verdict {{ 'approved' if approved else 'rejected' }}">
+      {% if approved %}
+        ✔ APPROVED — All conditions passed
+      {% else %}
+        ✘ REJECTED — One or more conditions failed
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+</body>
+</html>

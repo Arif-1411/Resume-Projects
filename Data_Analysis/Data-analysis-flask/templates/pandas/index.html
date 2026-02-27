@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}02 — Pandas{% endblock %}
+{% block content %}
+<h1 style="font-size:1.4rem; color:#1a1a2e; margin-bottom:6px;">02 — Pandas Fundamentals</h1>
+<div class="concept">
+  <strong>Concepts:</strong> <code>DataFrame</code> · <code>groupby().agg()</code> · Boolean filtering · <code>.apply()</code> · <code>.merge()</code> · <code>pivot_table()</code>
+</div>
+
+<!-- Preview -->
+<div class="card">
+  <h2>Dataset Preview</h2>
+  <div class="btn-row">
+    <button onclick="loadPreview()">▶ Load Student Dataset (50 rows)</button>
+  </div>
+  <div id="preview-info" class="result-box hidden" style="margin-bottom:10px;"></div>
+  <div id="preview-table"></div>
+</div>
+
+<div class="grid-2">
+
+  <!-- GroupBy -->
+  <div class="card">
+    <h2>GroupBy & Aggregation</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:10px;"><code>df.groupby(col).agg(count, avg, pass_rate)</code></p>
+    <div>
+      <label>Group by</label>
+      <select id="grp-col">
+        <option value="department">Department</option>
+        <option value="gender">Gender</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button onclick="doGroupBy()">▶ GroupBy</button>
+    </div>
+    <div id="grp-result" class="result-box hidden"></div>
+  </div>
+
+  <!-- Filter -->
+  <div class="card">
+    <h2>Filter & Query</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:10px;"><code>df[(df['dept']==X) &amp; (df['avg']&gt;=Y)]</code></p>
+    <div class="row">
+      <div>
+        <label>Department</label>
+        <select id="flt-dept">
+          <option>CS</option><option>Maths</option>
+          <option>Physics</option><option>Chemistry</option>
+        </select>
+      </div>
+      <div>
+        <label>Min Avg Score</label>
+        <input type="number" id="flt-avg" value="60" min="0" max="100" />
+      </div>
+    </div>
+    <div class="btn-row">
+      <button onclick="doFilter()">▶ Filter</button>
+    </div>
+    <div id="flt-result" class="result-box hidden"></div>
+  </div>
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadPreview() {
+  const d = await get('/api/pandas/preview');
+  show('preview-info');
+  html('preview-info', `Shape: <strong>${d.shape[0]} rows × ${d.shape[1]} columns</strong> &nbsp;|&nbsp; Columns: ${d.columns.join(', ')}`);
+  html('preview-table', makeTable(d.rows, ['student_id','name','age','gender','department','math_score','science_score','english_score','avg','passed']));
+}
+async function doGroupBy() {
+  const d = await post('/api/pandas/groupby', {col: val('grp-col')});
+  show('grp-result');
+  html('grp-result', makeTable(d));
+}
+async function doFilter() {
+  const d = await post('/api/pandas/filter', {department: val('flt-dept'), min_avg: val('flt-avg')});
+  show('flt-result');
+  html('flt-result', `<p style="margin-bottom:8px;">Found <strong>${d.count} students</strong></p>` +
+    makeTable(d.rows, ['student_id','name','department','avg','passed']));
+}
+loadPreview();
+</script>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}05 — Outliers{% endblock %}
+{% block content %}
+<h1 style="font-size:1.4rem; color:#1a1a2e; margin-bottom:6px;">05 — Outlier Detection & Treatment</h1>
+<div class="concept">
+  <strong>Methods:</strong> IQR · Z-Score · Modified Z-Score &nbsp;|&nbsp;
+  <strong>Treatments:</strong> Remove · Cap (Winsorization) · Log Transform
+</div>
+
+<div class="grid-2">
+
+  <!-- Detection -->
+  <div class="card">
+    <h2>Outlier Detection</h2>
+    <div class="row">
+      <div>
+        <label>Column</label>
+        <select id="out-col">
+          <option value="salary">Salary</option>
+          <option value="age">Age</option>
+        </select>
+      </div>
+      <div>
+        <label>Method</label>
+        <select id="out-method">
+          <option value="iqr">IQR (Q1 - 1.5×IQR)</option>
+          <option value="zscore">Z-Score (|z| > 3)</option>
+          <option value="modz">Modified Z-Score</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button onclick="doDetect()">▶ Detect Outliers</button>
+    </div>
+    <div id="detect-result" class="result-box hidden"></div>
+  </div>
+
+  <!-- Treatment -->
+  <div class="card">
+    <h2>Outlier Treatment</h2>
+    <div>
+      <label>Treatment for Salary column</label>
+      <select id="treat-method">
+        <option value="remove">Remove outliers</option>
+        <option value="cap">Cap / Winsorize</option>
+        <option value="log">Log Transform</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button onclick="doTreat()">▶ Apply Treatment</button>
+    </div>
+    <div id="treat-result" class="result-box hidden"></div>
+  </div>
+
+</div>
+
+<!-- Compare all methods -->
+<div class="card">
+  <h2>Compare All 3 Methods (Salary)</h2>
+  <div class="btn-row">
+    <button onclick="compareAll()">▶ Compare IQR vs Z-Score vs Modified Z</button>
+  </div>
+  <div id="compare-result" class="result-box hidden"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function doDetect() {
+  const d = await post('/api/outliers/detect', {col: val('out-col'), method: val('out-method')});
+  show('detect-result');
+  const pct = d.outlier_pct;
+  html('detect-result', `
+    <div class="stat-grid">
+      <div class="stat-item"><div class="val">${d.total}</div><div class="lbl">Total rows</div></div>
+      <div class="stat-item"><div class="val" style="color:#e74c3c;">${d.outlier_count}</div><div class="lbl">Outliers</div></div>
+      <div class="stat-item"><div class="val" style="color:#e74c3c;">${pct}%</div><div class="lbl">Outlier %</div></div>
+    </div>
+    <p style="margin-top:10px; font-size:0.82rem;"><strong>Outlier values detected:</strong></p>
+    <div class="pills">${d.outlier_values.map(v=>`<span class="pill red">${v}</span>`).join('')}</div>
+    <p style="margin-top:8px; font-size:0.82rem; color:#666;">Bounds: ${JSON.stringify(d.bounds)}</p>
+  `);
+}
+
+async function doTreat() {
+  const d = await post('/api/outliers/treat', {treatment: val('treat-method')});
+  show('treat-result');
+  html('treat-result', `
+    <div class="stat-grid">
+      <div class="stat-item"><div class="val">${d.before_count}</div><div class="lbl">Before count</div></div>
+      <div class="stat-item"><div class="val" style="color:#27ae60;">${d.after_count}</div><div class="lbl">After count</div></div>
+      <div class="stat-item"><div class="val" style="color:#e74c3c;">${d.before_skew}</div><div class="lbl">Skew Before</div></div>
+      <div class="stat-item"><div class="val" style="color:#27ae60;">${d.after_skew}</div><div class="lbl">Skew After</div></div>
+      <div class="stat-item"><div class="val">${d.before_max.toLocaleString()}</div><div class="lbl">Max Before</div></div>
+      <div class="stat-item"><div class="val" style="color:#27ae60;">${d.after_max.toLocaleString()}</div><div class="lbl">Max After</div></div>
+    </div>
+  `);
+}
+
+async function compareAll() {
+  const [iqr, z, mz] = await Promise.all([
+    post('/api/outliers/detect', {col:'salary', method:'iqr'}),
+    post('/api/outliers/detect', {col:'salary', method:'zscore'}),
+    post('/api/outliers/detect', {col:'salary', method:'modz'}),
+  ]);
+  show('compare-result');
+  html('compare-result', `
+    <div class="tbl-wrap"><table>
+      <tr><th>Method</th><th>Outliers Found</th><th>%</th><th>Bounds/Threshold</th></tr>
+      <tr><td>IQR (1.5×IQR)</td><td><span class="badge badge-red">${iqr.outlier_count}</span></td><td>${iqr.outlier_pct}%</td><td>${JSON.stringify(iqr.bounds)}</td></tr>
+      <tr><td>Z-Score (|z|>3)</td><td><span class="badge badge-yellow">${z.outlier_count}</span></td><td>${z.outlier_pct}%</td><td>${JSON.stringify(z.bounds)}</td></tr>
+      <tr><td>Modified Z-Score</td><td><span class="badge badge-blue">${mz.outlier_count}</span></td><td>${mz.outlier_pct}%</td><td>${JSON.stringify(mz.bounds)}</td></tr>
+    </table></div>
+  `);
+}
+doDetect();
+</script>
+{% endblock %}

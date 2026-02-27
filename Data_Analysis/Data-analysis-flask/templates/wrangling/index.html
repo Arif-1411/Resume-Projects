@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}06 — Wrangling{% endblock %}
+{% block content %}
+<h1 style="font-size:1.4rem; color:#1a1a2e; margin-bottom:6px;">06 — Data Wrangling</h1>
+<div class="concept">
+  <strong>Techniques:</strong> <code>merge()</code> · <code>melt()</code> · <code>pivot_table()</code> · <code>groupby().transform()</code> · <code>pd.cut()</code> / <code>pd.qcut()</code>
+</div>
+
+<!-- Merge -->
+<div class="card">
+  <h2>merge() — Join Types</h2>
+  <p style="font-size:0.82rem; color:#666; margin-bottom:10px;">employees ← → departments on <code>dept_id</code></p>
+  <div class="row">
+    <div>
+      <label>Join type</label>
+      <select id="merge-how">
+        <option value="inner">inner</option>
+        <option value="left">left</option>
+        <option value="right">right</option>
+        <option value="outer">outer</option>
+      </select>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button onclick="doMerge()">▶ Merge</button>
+  </div>
+  <div id="merge-result" class="result-box hidden"></div>
+  <div id="merge-table"></div>
+</div>
+
+<div class="grid-2">
+
+  <!-- Melt -->
+  <div class="card">
+    <h2>melt() — Wide → Long</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:10px;">Q1/Q2/Q3/Q4 columns → single <code>quarter</code> column</p>
+    <div class="btn-row">
+      <button onclick="doMelt()">▶ Show Wide vs Long</button>
+    </div>
+    <div id="melt-result" class="result-box hidden"></div>
+  </div>
+
+  <!-- Transform -->
+  <div class="card">
+    <h2>groupby().transform()</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:10px;">Add dept average & rank as columns</p>
+    <div class="btn-row">
+      <button onclick="doTransform()">▶ Run transform()</button>
+    </div>
+    <div id="transform-table"></div>
+  </div>
+
+  <!-- Cut -->
+  <div class="card">
+    <h2>pd.cut() vs pd.qcut() — Binning</h2>
+    <div>
+      <label>Binning type</label>
+      <select id="cut-type">
+        <option value="cut">pd.cut() — fixed bins</option>
+        <option value="qcut">pd.qcut() — equal frequency</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button onclick="doCut()">▶ Bin Salary</button>
+    </div>
+    <div id="cut-result" class="result-box hidden"></div>
+  </div>
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function doMerge() {
+  const d = await post('/api/wrangling/merge', {how: val('merge-how')});
+  show('merge-result');
+  html('merge-result', `Rows returned: <strong>${d.count}</strong> &nbsp;|&nbsp; Columns: ${d.cols.join(', ')}`);
+  html('merge-table', makeTable(d.rows));
+}
+async function doMelt() {
+  const d = await get('/api/wrangling/melt');
+  show('melt-result');
+  html('melt-result',
+    '<p style="font-weight:bold;margin-bottom:6px;">WIDE format (4 score columns):</p>' +
+    makeTable(d.wide) +
+    '<p style="font-weight:bold;margin:14px 0 6px;">LONG format (melt → quarter + score):</p>' +
+    makeTable(d.long)
+  );
+}
+async function doTransform() {
+  const d = await get('/api/wrangling/transform');
+  html('transform-table', makeTable(d, ['name','dept_name','salary','dept_avg','vs_avg','dept_rank']));
+}
+async function doCut() {
+  const d = await post('/api/wrangling/cut', {type: val('cut-type').split(' ')[0].replace('pd.','').replace('()','')});
+  show('cut-result');
+  const items = d.labels.map((l,i) => ({label:l, value:d.values[i]}));
+  html('cut-result', barChart(items, 'label', 'value'));
+}
+doMerge(); doTransform();
+</script>
+{% endblock %}

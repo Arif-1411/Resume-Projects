@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Data Analysis Portfolio{% endblock %}
+{% block content %}
+<div style="text-align:center; padding: 30px 0 10px;">
+  <h1 style="font-size:1.8rem; color:#1a1a2e;">📊 Data Analysis Portfolio</h1>
+  <p style="color:#666; margin-top:8px; font-size:0.95rem;">7 Interactive notebooks — NumPy · Pandas · Cleaning · EDA · Outliers · Wrangling · Feature Engineering</p>
+</div>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:16px; margin-top:24px;">
+
+  <a href="/numpy" style="text-decoration:none;">
+    <div class="card" style="border-top:4px solid #e94560; cursor:pointer;">
+      <div style="font-size:2rem;">🔢</div>
+      <h2 style="border:none; padding:0; margin:8px 0 6px; color:#e94560;">01 — NumPy Fundamentals</h2>
+      <p style="font-size:0.85rem; color:#666;">Arrays, indexing, broadcasting, statistics, boolean masking, random simulation</p>
+      <div class="pills" style="margin-top:10px;">
+        <span class="pill">Arrays</span><span class="pill">Stats</span><span class="pill">Masking</span><span class="pill">Broadcasting</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="/pandas" style="text-decoration:none;">
+    <div class="card" style="border-top:4px solid #3498db; cursor:pointer;">
+      <div style="font-size:2rem;">🐼</div>
+      <h2 style="border:none; padding:0; margin:8px 0 6px; color:#3498db;">02 — Pandas Fundamentals</h2>
+      <p style="font-size:0.85rem; color:#666;">DataFrame, filtering, groupby, merge, apply, pivot table</p>
+      <div class="pills" style="margin-top:10px;">
+        <span class="pill">DataFrame</span><span class="pill">GroupBy</span><span class="pill">Merge</span><span class="pill">apply()</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="/cleaning" style="text-decoration:none;">
+    <div class="card" style="border-top:4px solid #27ae60; cursor:pointer;">
+      <div style="font-size:2rem;">🧹</div>
+      <h2 style="border:none; padding:0; margin:8px 0 6px; color:#27ae60;">03 — Data Cleaning</h2>
+      <p style="font-size:0.85rem; color:#666;">Missing values, duplicates, invalid data, outlier capping, type fixing</p>
+      <div class="pills" style="margin-top:10px;">
+        <span class="pill">Nulls</span><span class="pill">Duplicates</span><span class="pill">Capping</span><span class="pill">Types</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="/eda" style="text-decoration:none;">
+    <div class="card" style="border-top:4px solid #8e44ad; cursor:pointer;">
+      <div style="font-size:2rem;">📈</div>
+      <h2 style="border:none; padding:0; margin:8px 0 6px; color:#8e44ad;">04 — EDA & Distributions</h2>
+      <p style="font-size:0.85rem; color:#666;">Univariate, bivariate, correlation heatmap, skewness, normality test</p>
+      <div class="pills" style="margin-top:10px;">
+        <span class="pill">Histogram</span><span class="pill">Boxplot</span><span class="pill">Correlation</span><span class="pill">Skewness</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="/outliers" style="text-decoration:none;">
+    <div class="card" style="border-top:4px solid #e67e22; cursor:pointer;">
+      <div style="font-size:2rem;">🎯</div>
+      <h2 style="border:none; padding:0; margin:8px 0 6px; color:#e67e22;">05 — Outlier Detection</h2>
+      <p style="font-size:0.85rem; color:#666;">IQR, Z-Score, Modified Z-Score — remove, cap, log transform</p>
+      <div class="pills" style="margin-top:10px;">
+        <span class="pill">IQR</span><span class="pill">Z-Score</span><span class="pill">Mod Z</span><span class="pill">Treatment</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="/wrangling" style="text-decoration:none;">
+    <div class="card" style="border-top:4px solid #16a085; cursor:pointer;">
+      <div style="font-size:2rem;">🔧</div>
+      <h2 style="border:none; padding:0; margin:8px 0 6px; color:#16a085;">06 — Data Wrangling</h2>
+      <p style="font-size:0.85rem; color:#666;">merge/join, concat, melt, pivot, transform, cut/qcut, strings</p>
+      <div class="pills" style="margin-top:10px;">
+        <span class="pill">merge()</span><span class="pill">melt()</span><span class="pill">transform()</span><span class="pill">cut()</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="/features" style="text-decoration:none;">
+    <div class="card" style="border-top:4px solid #c0392b; cursor:pointer;">
+      <div style="font-size:2rem;">⚙️</div>
+      <h2 style="border:none; padding:0; margin:8px 0 6px; color:#c0392b;">07 — Feature Engineering & Selection</h2>
+      <p style="font-size:0.85rem; color:#666;">Encoding, scaling, interactions, RFE, RF importance, SelectKBest</p>
+      <div class="pills" style="margin-top:10px;">
+        <span class="pill">Encoding</span><span class="pill">Scaling</span><span class="pill">RFE</span><span class="pill">RF Importance</span>
+      </div>
+    </div>
+  </a>
+
+</div>
+{% endblock %}

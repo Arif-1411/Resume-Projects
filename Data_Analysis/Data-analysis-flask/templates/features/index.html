@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}07 — Feature Engineering{% endblock %}
+{% block content %}
+<h1 style="font-size:1.4rem; color:#1a1a2e; margin-bottom:6px;">07 — Feature Engineering & Selection</h1>
+<div class="concept">
+  <strong>Engineering:</strong> log transform · interactions · binning · date features &nbsp;|&nbsp;
+  <strong>Encoding:</strong> Label · Ordinal · One-Hot &nbsp;|&nbsp;
+  <strong>Scaling:</strong> MinMax · Standard · Robust &nbsp;|&nbsp;
+  <strong>Selection:</strong> Variance · Correlation · SelectKBest · RFE · RF Importance
+</div>
+
+<!-- Engineering -->
+<div class="card">
+  <h2>Feature Engineering — New Features Created</h2>
+  <p style="font-size:0.82rem; color:#666; margin-bottom:10px;">
+    <code>salary_log = log1p(salary)</code> · <code>exp_per_age = experience/age</code> · <code>age_group = pd.cut(age)</code>
+  </p>
+  <div class="btn-row">
+    <button onclick="doEngineer()">▶ Show Engineered Features</button>
+  </div>
+  <div id="eng-table"></div>
+</div>
+
+<div class="grid-2">
+
+  <!-- Encoding -->
+  <div class="card">
+    <h2>Encoding</h2>
+    <div>
+      <label>Encoding method</label>
+      <select id="enc-method">
+        <option value="label">Label Encoding (binary)</option>
+        <option value="ordinal">Ordinal Encoding (ordered)</option>
+        <option value="ohe">One-Hot Encoding (nominal)</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button onclick="doEncode()">▶ Encode</button>
+    </div>
+    <div id="enc-table"></div>
+  </div>
+
+  <!-- Scaling -->
+  <div class="card">
+    <h2>Feature Scaling</h2>
+    <div class="row">
+      <div>
+        <label>Scaler</label>
+        <select id="scale-method">
+          <option value="minmax">MinMaxScaler (0–1)</option>
+          <option value="standard">StandardScaler (z-score)</option>
+          <option value="robust">RobustScaler (IQR)</option>
+        </select>
+      </div>
+      <div>
+        <label>Column</label>
+        <select id="scale-col">
+          <option value="salary">Salary</option>
+          <option value="age">Age</option>
+          <option value="experience">Experience</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button onclick="doScale()">▶ Scale</button>
+    </div>
+    <div id="scale-result" class="result-box hidden"></div>
+  </div>
+
+</div>
+
+<!-- Feature Selection -->
+<div class="card">
+  <h2>Feature Selection</h2>
+  <div>
+    <label>Selection method</label>
+    <select id="sel-method">
+      <option value="rf">Random Forest Importance</option>
+      <option value="kbest">SelectKBest (f_classif)</option>
+      <option value="rfe">RFE (Logistic Regression)</option>
+      <option value="variance">Variance Threshold</option>
+    </select>
+  </div>
+  <div class="btn-row">
+    <button onclick="doSelection()">▶ Run Selection</button>
+  </div>
+  <div id="sel-result" class="result-box hidden"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function doEngineer() {
+  const d = await get('/api/features/engineer');
+  html('eng-table', makeTable(d));
+}
+async function doEncode() {
+  const d = await post('/api/features/encode', {method: val('enc-method')});
+  html('enc-table', makeTable(d));
+}
+async function doScale() {
+  const d = await post('/api/features/scale', {method: val('scale-method').split('S')[0].toLowerCase().trim(), col: val('scale-col')});
+  show('scale-result');
+  html('scale-result', `
+    <div class="stat-grid">
+      <div class="stat-item"><div class="val">${d.scaled_min}</div><div class="lbl">Scaled Min</div></div>
+      <div class="stat-item"><div class="val">${d.scaled_max}</div><div class="lbl">Scaled Max</div></div>
+      <div class="stat-item"><div class="val">${d.scaled_mean}</div><div class="lbl">Scaled Mean</div></div>
+    </div>
+    <p style="margin-top:10px; font-size:0.82rem;"><strong>Original sample:</strong> ${d.original_sample.join(', ')}</p>
+    <p style="margin-top:4px; font-size:0.82rem;"><strong>Scaled sample:</strong> ${d.scaled_sample.join(', ')}</p>
+  `);
+}
+async function doSelection() {
+  const methodMap = {
+    'Random Forest Importance':'rf',
+    'SelectKBest (f_classif)':'kbest',
+    'RFE (Logistic Regression)':'rfe',
+    'Variance Threshold':'variance',
+  };
+  const selectEl = document.getElementById('sel-method');
+  const method = selectEl.value;
+  const d = await post('/api/features/selection', {method});
+  show('sel-result');
+  let extra = '';
+  if (d.selected) extra += `<p style="margin-top:10px;font-size:0.85rem;"><strong>Selected features:</strong> ${d.selected.map(f=>`<span class="badge badge-green">${f}</span>`).join(' ')}</p>`;
+  if (d.dropped)  extra += `<p style="margin-top:6px;font-size:0.85rem;"><strong>Dropped:</strong> ${d.dropped.map(f=>`<span class="badge badge-red">${f}</span>`).join(' ')}</p>`;
+  const scoreLabel = method === 'rfe' ? 'Rank (1=best)' : 'Score';
+  html('sel-result', `<h3 style="margin-bottom:8px;">${d.method}</h3>` + extra +
+    barChart(d.result.slice(0,7), 'feature', 'score'));
+}
+doEngineer(); doEncode();
+</script>
+{% endblock %}

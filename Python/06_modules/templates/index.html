@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>06 – Modules</title>
+  <style>
+    body        { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    .container  { max-width: 800px; margin: auto; background: #fff; padding: 30px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h1          { color: #2c3e50; border-bottom: 2px solid #16a085; padding-bottom: 10px; }
+    label       { display: block; margin-top: 12px; font-weight: bold; color: #333; font-size: 0.9rem; }
+    input[type="text"],
+    input[type="number"] { width: 100%; padding: 7px; margin-top: 3px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .grid       { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    button      { margin-top: 20px; padding: 10px 24px; background: #16a085; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #148f77; }
+    .concept    { background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 12px; margin-bottom: 20px; font-size: 0.9rem; }
+    .section    { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; padding: 14px; margin-top: 16px; }
+    .mod-label  { font-size: 0.78rem; background: #16a085; color: #fff; padding: 2px 8px; border-radius: 3px; margin-bottom: 10px; display: inline-block; }
+    .mod-label.builtin { background: #2980b9; }
+    .kv div     { padding: 5px 0; border-bottom: 1px solid #eee; font-size: 0.88rem; display: flex; gap: 10px; }
+    .kv div span:first-child { font-weight: bold; color: #555; min-width: 150px; }
+    .badge      { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 0.82rem; }
+    .badge.yes  { background: #d4edda; color: #155724; }
+    .badge.no   { background: #f8d7da; color: #721c24; }
+    .type-note  { font-size: 0.76rem; color: #888; font-weight: normal; margin-left: 5px; }
+    .file-tag   { display: inline-block; background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; padding: 2px 8px; border-radius: 3px; font-size: 0.82rem; margin: 2px; font-family: monospace; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Python Project 06 — Modules</h1>
+
+  <div class="concept">
+    <strong>Concepts shown:</strong>
+    custom modules (<code>import math_utils</code>), Python standard library (<code>math</code>, <code>random</code>, <code>os</code>, <code>datetime</code>), module separation and reuse.
+    <br/><br/>
+    <strong>Custom modules created:</strong>
+    <span class="file-tag">math_utils.py</span>
+    <span class="file-tag">string_utils.py</span>
+    <span class="file-tag">date_utils.py</span>
+  </div>
+
+  <form method="POST">
+    <div class="grid">
+      <label>Number A <span class="type-note">→ math_utils</span>
+        <input type="number" step="any" name="a" value="10" />
+      </label>
+      <label>Number B <span class="type-note">→ math_utils</span>
+        <input type="number" step="any" name="b" value="3" />
+      </label>
+    </div>
+    <label>Text <span class="type-note">→ string_utils</span>
+      <input type="text" name="text" value="racecar" />
+    </label>
+    <div class="grid">
+      <label>Birth Year <span class="type-note">→ date_utils.age_from_year()</span>
+        <input type="number" name="dob_year" value="1995" />
+      </label>
+      <label>Year to find day of week <span class="type-note">→ date_utils.day_of_week()</span>
+        <input type="number" name="year" value="2000" />
+      </label>
+    </div>
+    <button type="submit">Run All Modules</button>
+  </form>
+
+  {% if results %}
+
+  <div class="section">
+    <span class="mod-label">import math_utils (custom module)</span>
+    <div class="kv">
+      <div><span>add(a, b)</span>{{ results.math.add }}</div>
+      <div><span>subtract(a, b)</span>{{ results.math.subtract }}</div>
+      <div><span>multiply(a, b)</span>{{ results.math.multiply }}</div>
+      <div><span>divide(a, b)</span>{{ results.math.divide }}</div>
+      <div><span>power(a, b)</span>{{ results.math.power }}</div>
+      <div><span>is_prime(a)</span>
+        {% if results.math.is_prime %}<span class="badge yes">True</span>{% else %}<span class="badge no">False</span>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="mod-label">import string_utils (custom module)</span>
+    <div class="kv">
+      <div><span>original</span>{{ results.string.original }}</div>
+      <div><span>reverse_string()</span>{{ results.string.reversed }}</div>
+      <div><span>count_words()</span>{{ results.string.word_count }}</div>
+      <div><span>is_palindrome()</span>
+        {% if results.string.palindrome %}<span class="badge yes">Yes</span>{% else %}<span class="badge no">No</span>{% endif %}
+      </div>
+      <div><span>title_case()</span>{{ results.string.title_case }}</div>
+      <div><span>count_vowels()</span>{{ results.string.vowels }}</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="mod-label">import date_utils (custom module using datetime)</span>
+    <div class="kv">
+      <div><span>today()</span>{{ results.date.today }}</div>
+      <div><span>current_time()</span>{{ results.date.time }}</div>
+      <div><span>age_from_year()</span>{{ results.date.age }} years</div>
+      <div><span>days_until_new_year()</span>{{ results.date.days_new_year }} days</div>
+      <div><span>day_of_week(year,1,1)</span>{{ results.date.day_of_week }}</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="mod-label builtin">Python Standard Library — import math · random · os</span>
+    <div class="kv">
+      <div><span>math.sqrt(a)</span>{{ results.stdlib.math_sqrt }}</div>
+      <div><span>math.pi</span>{{ results.stdlib.math_pi }}</div>
+      <div><span>math.floor(a)</span>{{ results.stdlib.math_floor }}</div>
+      <div><span>math.ceil(a)</span>{{ results.stdlib.math_ceil }}</div>
+      <div><span>random.randint(1,100)</span>{{ results.stdlib.random_int }}</div>
+      <div><span>random.choice()</span>{{ results.stdlib.random_choice }}</div>
+      <div><span>os.getcwd()</span><span style="word-break:break-all;">{{ results.stdlib.os_cwd }}</span></div>
+      <div><span>os.name</span>{{ results.stdlib.os_platform }}</div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+</body>
+</html>

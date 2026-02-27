@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}01 — NumPy{% endblock %}
+{% block content %}
+<h1 style="font-size:1.4rem; color:#1a1a2e; margin-bottom:6px;">01 — NumPy Fundamentals</h1>
+<div class="concept">
+  <strong>Concepts:</strong> <code>np.array</code> · <code>np.mean/std/percentile</code> · Boolean masking · Broadcasting · <code>np.random.normal</code>
+</div>
+
+<div class="grid-2">
+
+  <!-- Array Properties -->
+  <div class="card">
+    <h2>Array Creation & Properties</h2>
+    <div>
+      <label>Enter numbers (comma-separated)</label>
+      <input type="text" id="arr-input" value="10, 20, 30, 40, 50, 60" />
+    </div>
+    <div class="btn-row">
+      <button onclick="arrayProps()">▶ Inspect Array</button>
+    </div>
+    <div id="arr-result" class="result-box hidden"></div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="card">
+    <h2>Statistical Operations</h2>
+    <div>
+      <label>Numbers</label>
+      <input type="text" id="stat-input" value="23, 45, 12, 67, 34, 89, 56, 78, 90, 11, 44, 65" />
+    </div>
+    <div class="btn-row">
+      <button onclick="doStats()">▶ Compute Stats</button>
+    </div>
+    <div id="stat-result" class="result-box hidden"></div>
+  </div>
+
+  <!-- Boolean Masking -->
+  <div class="card">
+    <h2>Boolean Masking</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:10px;"><code>arr[arr &gt;= threshold]</code> — filter values</p>
+    <div class="row">
+      <div>
+        <label>Numbers</label>
+        <input type="text" id="mask-input" value="45, 78, 23, 91, 56, 88, 34, 72, 61, 95" />
+      </div>
+      <div style="max-width:110px;">
+        <label>Threshold</label>
+        <input type="number" id="mask-thresh" value="60" />
+      </div>
+    </div>
+    <div class="btn-row">
+      <button onclick="doMask()">▶ Apply Mask</button>
+    </div>
+    <div id="mask-result" class="result-box hidden"></div>
+  </div>
+
+  <!-- Random Simulation -->
+  <div class="card">
+    <h2>Random Simulation (Normal Distribution)</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:10px;"><code>np.random.normal(loc, scale, size)</code></p>
+    <div class="row">
+      <div><label>N (samples)</label><input type="number" id="rand-n" value="500" min="10" max="2000" /></div>
+      <div><label>Mean</label><input type="number" id="rand-mean" value="65" /></div>
+      <div><label>Std Dev</label><input type="number" id="rand-std" value="15" /></div>
+    </div>
+    <div class="btn-row">
+      <button onclick="doRandom()">▶ Simulate</button>
+    </div>
+    <div id="rand-result" class="result-box hidden"></div>
+  </div>
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function arrayProps() {
+  const d = await post('/api/numpy/array', {values: val('arr-input')});
+  show('arr-result');
+  html('arr-result', `
+    <div class="stat-grid">
+      <div class="stat-item"><div class="val">${d.shape}</div><div class="lbl">Shape</div></div>
+      <div class="stat-item"><div class="val">${d.ndim}</div><div class="lbl">Dimensions</div></div>
+      <div class="stat-item"><div class="val">${d.size}</div><div class="lbl">Size</div></div>
+      <div class="stat-item"><div class="val">${d.dtype}</div><div class="lbl">dtype</div></div>
+    </div>
+    <p style="margin-top:10px; font-size:0.85rem; color:#555;">Array: <strong>[${d.array.join(', ')}]</strong></p>
+  `);
+}
+async function doStats() {
+  const d = await post('/api/numpy/stats', {values: val('stat-input')});
+  show('stat-result');
+  html('stat-result', `<div class="stat-grid">
+    <div class="stat-item"><div class="val">${d.mean}</div><div class="lbl">Mean</div></div>
+    <div class="stat-item"><div class="val">${d.median}</div><div class="lbl">Median</div></div>
+    <div class="stat-item"><div class="val">${d.std}</div><div class="lbl">Std Dev</div></div>
+    <div class="stat-item"><div class="val">${d.variance}</div><div class="lbl">Variance</div></div>
+    <div class="stat-item"><div class="val">${d.min}</div><div class="lbl">Min</div></div>
+    <div class="stat-item"><div class="val">${d.max}</div><div class="lbl">Max</div></div>
+    <div class="stat-item"><div class="val">${d.pct25}</div><div class="lbl">25th %ile</div></div>
+    <div class="stat-item"><div class="val">${d.pct75}</div><div class="lbl">75th %ile</div></div>
+    <div class="stat-item"><div class="val">${d.iqr}</div><div class="lbl">IQR</div></div>
+    <div class="stat-item"><div class="val">${d.sum}</div><div class="lbl">Sum</div></div>
+  </div>`);
+}
+async function doMask() {
+  const d = await post('/api/numpy/mask', {values: val('mask-input'), threshold: val('mask-thresh')});
+  show('mask-result');
+  html('mask-result', `
+    <p><strong>Above ≥ ${val('mask-thresh')}:</strong> ${d.above_count} values (${d.above_pct}%)</p>
+    <div class="pills">${d.above.map(v=>`<span class="pill green">${v}</span>`).join('')}</div>
+    <p style="margin-top:10px;"><strong>Below &lt; ${val('mask-thresh')}:</strong> ${d.below_count} values</p>
+    <div class="pills">${d.below.map(v=>`<span class="pill red">${v}</span>`).join('')}</div>
+  `);
+}
+async function doRandom() {
+  const d = await post('/api/numpy/random', {n: val('rand-n'), mean: val('rand-mean'), std: val('rand-std')});
+  show('rand-result');
+  html('rand-result', `<div class="stat-grid">
+    <div class="stat-item"><div class="val">${d.mean}</div><div class="lbl">Actual Mean</div></div>
+    <div class="stat-item"><div class="val">${d.std}</div><div class="lbl">Actual Std</div></div>
+    <div class="stat-item"><div class="val">${d.min}</div><div class="lbl">Min</div></div>
+    <div class="stat-item"><div class="val">${d.max}</div><div class="lbl">Max</div></div>
+    <div class="stat-item"><div class="val">${d.pass_pct}%</div><div class="lbl">Pass % (≥60)</div></div>
+  </div>
+  <p style="margin-top:10px; font-size:0.82rem; color:#666;">First 10 values: <strong>${d.sample.join(', ')}</strong></p>`);
+}
+arrayProps(); doStats();
+</script>
+{% endblock %}

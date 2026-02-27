@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>03 – Loops</title>
+  <style>
+    body        { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    .container  { max-width: 800px; margin: auto; background: #fff; padding: 30px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h1          { color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; }
+    h3          { color: #27ae60; margin-top: 25px; margin-bottom: 8px; }
+    label       { display: block; margin-top: 12px; font-weight: bold; color: #333; }
+    input[type="text"] { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button      { margin-top: 20px; padding: 10px 24px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #219a52; }
+    .concept    { background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 12px; margin-bottom: 20px; font-size: 0.9rem; }
+    .section    { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; padding: 15px; margin-top: 18px; }
+    .loop-label { font-size: 0.78rem; background: #27ae60; color: #fff; padding: 2px 8px; border-radius: 3px; margin-bottom: 10px; display: inline-block; }
+    .pills      { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .pill       { padding: 4px 12px; border-radius: 3px; font-size: 0.88rem; }
+    .pill.blue  { background: #d1ecf1; color: #0c5460; }
+    .pill.green { background: #d4edda; color: #155724; }
+    .pill.orange{ background: #ffeeba; color: #856404; }
+    .pill.red   { background: #f8d7da; color: #721c24; }
+    table       { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 6px; }
+    th          { background: #27ae60; color: #fff; padding: 6px 10px; text-align: left; }
+    td          { padding: 5px 10px; border-bottom: 1px solid #eee; }
+    tr:nth-child(even) td { background: #f2f2f2; }
+    .type-note  { font-size: 0.78rem; color: #888; font-weight: normal; margin-left: 6px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Python Project 03 — Loops</h1>
+
+  <div class="concept">
+    <strong>Concepts shown:</strong>
+    <code>for</code> loop, <code>while</code> loop, <code>range()</code>, <code>enumerate()</code>, nested loops, list comprehension.
+  </div>
+
+  <form method="POST">
+    <label>Numbers (comma-separated) <span class="type-note">→ used in all loops</span>
+      <input type="text" name="numbers" value="{{ numbers }}" />
+    </label>
+    <label>Word <span class="type-note">→ enumerate loop</span>
+      <input type="text" name="word" value="{{ word }}" maxlength="12" />
+    </label>
+    <button type="submit">Run All Loops</button>
+  </form>
+
+  {% if results %}
+
+  <div class="section">
+    <span class="loop-label">for loop — squares</span>
+    <table>
+      <tr><th>n</th><th>n × n</th></tr>
+      {% for item in results.for_squares %}
+      <tr><td>{{ item.n }}</td><td>{{ item.square }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="section">
+    <span class="loop-label">while loop — countdown from 10</span>
+    <div class="pills">
+      {% for n in results.while_countdown %}
+      <span class="pill blue">{{ n }}</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="loop-label">for loop with range — {{ results.mul_num }}× table</span>
+    <table>
+      <tr><th>i</th><th>{{ results.mul_num }} × i</th></tr>
+      {% for row in results.multiplication %}
+      <tr><td>{{ row.i }}</td><td>{{ row.product }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="section">
+    <span class="loop-label">nested for loop — pair sums</span>
+    <table>
+      <tr><th>a</th><th>b</th><th>a + b</th></tr>
+      {% for p in results.nested_pairs %}
+      <tr><td>{{ p.a }}</td><td>{{ p.b }}</td><td>{{ p.sum }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="section">
+    <span class="loop-label">enumerate — index + character</span>
+    <div class="pills">
+      {% for item in results.enumerate %}
+      <span class="pill orange">[{{ item.index }}] {{ item.char }}</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="loop-label">list comprehension — even / odd split</span>
+    <p style="margin:4px 0; font-size:0.88rem; color:#555;">Even numbers:</p>
+    <div class="pills">
+      {% for n in results.evens %}<span class="pill green">{{ n }}</span>{% else %}<em style="color:#aaa;">none</em>{% endfor %}
+    </div>
+    <p style="margin:10px 0 4px; font-size:0.88rem; color:#555;">Odd numbers:</p>
+    <div class="pills">
+      {% for n in results.odds %}<span class="pill red">{{ n }}</span>{% else %}<em style="color:#aaa;">none</em>{% endfor %}
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+</body>
+</html>

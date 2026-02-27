@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}03 — Data Cleaning{% endblock %}
+{% block content %}
+<h1 style="font-size:1.4rem; color:#1a1a2e; margin-bottom:6px;">03 — Data Cleaning</h1>
+<div class="concept">
+  <strong>Steps:</strong> Audit → Remove duplicates → Standardize categories → Fix invalid values → Cap outliers → Fill missing → Fix dtypes
+</div>
+
+<!-- Step 1: Audit -->
+<div class="card">
+  <h2>Step 1 — Audit the Raw (Dirty) Data</h2>
+  <div class="btn-row">
+    <button onclick="doAudit()">▶ Load & Audit Dirty Dataset</button>
+  </div>
+  <div id="audit-result" class="result-box hidden"></div>
+  <div id="audit-sample"></div>
+</div>
+
+<!-- Step 2: Clean -->
+<div class="card">
+  <h2>Step 2 — Apply Full Cleaning Pipeline</h2>
+  <p style="font-size:0.85rem; color:#666; margin-bottom:12px;">
+    Runs: <code>drop_duplicates</code> → <code>str.strip().str.title()</code> → invalid value removal → IQR cap → median fill → <code>astype()</code>
+  </p>
+  <div class="btn-row">
+    <button onclick="doClean()">▶ Clean Dataset</button>
+  </div>
+  <div id="clean-result" class="result-box hidden"></div>
+  <div id="clean-sample"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function doAudit() {
+  const d = await get('/api/cleaning/audit');
+  show('audit-result');
+  const missing = Object.entries(d.missing).filter(([k,v])=>v>0)
+    .map(([k,v])=>`<tr><td>${k}</td><td><span class="badge badge-red">${v}</span></td><td>${d.missing_pct[k]}%</td></tr>`).join('');
+  html('audit-result', `
+    <div class="stat-grid">
+      <div class="stat-item"><div class="val">${d.shape[0]} × ${d.shape[1]}</div><div class="lbl">Shape</div></div>
+      <div class="stat-item"><div class="val" style="color:#e74c3c;">${d.duplicates}</div><div class="lbl">Duplicates</div></div>
+      <div class="stat-item"><div class="val" style="color:#e74c3c;">${Object.values(d.missing).reduce((a,b)=>a+b,0)}</div><div class="lbl">Total Missing</div></div>
+    </div>
+    <h3 style="margin:14px 0 6px;">Missing Values by Column</h3>
+    <div class="tbl-wrap"><table><tr><th>Column</th><th>Count</th><th>%</th></tr>${missing}</table></div>
+    <p style="margin-top:10px; font-size:0.82rem;"><strong>Department values found:</strong> 
+    ${d.dept_unique.map(v=>`<span class="badge badge-yellow">${v}</span>`).join(' ')}</p>
+  `);
+  html('audit-sample', '<h3 style="margin:14px 0 6px; color:#1a1a2e;">Raw Sample (NULL = missing)</h3>' + makeTable(d.sample));
+}
+
+async function doClean() {
+  const d = await get('/api/cleaning/clean');
+  show('clean-result');
+  html('clean-result', `
+    <div class="stat-grid">
+      <div class="stat-item"><div class="val">${d.before_shape[0]}×${d.before_shape[1]}</div><div class="lbl">Before Shape</div></div>
+      <div class="stat-item"><div class="val" style="color:#27ae60;">${d.after_shape[0]}×${d.after_shape[1]}</div><div class="lbl">After Shape</div></div>
+      <div class="stat-item"><div class="val" style="color:#27ae60;">${d.missing_after}</div><div class="lbl">Missing After</div></div>
+      <div class="stat-item"><div class="val">${d.salary_max.toLocaleString()}</div><div class="lbl">Salary Max (capped)</div></div>
+    </div>
+    <p style="margin-top:10px; font-size:0.82rem;"><strong>Clean departments:</strong>
+    ${d.dept_unique.map(v=>`<span class="badge badge-green">${v}</span>`).join(' ')}</p>
+  `);
+  html('clean-sample', '<h3 style="margin:14px 0 6px; color:#1a1a2e;">Cleaned Sample</h3>' + makeTable(d.sample));
+}
+</script>
+{% endblock %}

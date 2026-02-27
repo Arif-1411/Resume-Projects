@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>01 – Variables</title>
+  <style>
+    body        { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    .container  { max-width: 700px; margin: auto; background: #fff; padding: 30px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h1          { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+    h2          { color: #3498db; font-size: 1rem; margin-top: 25px; }
+    label       { display: block; margin-top: 12px; font-weight: bold; color: #333; }
+    input[type="text"],
+    input[type="number"] { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .checkbox-row { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+    button      { margin-top: 20px; padding: 10px 24px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #2980b9; }
+    .result     { margin-top: 25px; background: #eaf4fb; border-left: 4px solid #3498db; padding: 15px; border-radius: 4px; }
+    .result table { width: 100%; border-collapse: collapse; }
+    .result td  { padding: 6px 10px; border-bottom: 1px solid #d0e9f7; }
+    .result td:first-child { font-weight: bold; color: #555; width: 140px; }
+    .tag        { display: inline-block; background: #3498db; color: #fff; padding: 2px 8px; border-radius: 3px; margin: 2px; font-size: 0.85rem; }
+    .badge      { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 0.85rem; }
+    .badge.yes  { background: #d4edda; color: #155724; }
+    .badge.no   { background: #f8d7da; color: #721c24; }
+    .type-note  { font-size: 0.78rem; color: #888; margin-left: 6px; }
+    .concept    { background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 12px; margin-bottom: 20px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Python Project 01 — Variables</h1>
+
+  <div class="concept">
+    <strong>Concepts shown:</strong>
+    <code>str</code>, <code>int</code>, <code>float</code>, <code>bool</code>, <code>list</code>, <code>dict</code> — all Python variable types in one form.
+  </div>
+
+  <form method="POST">
+    <label>Name <span class="type-note">→ str variable</span>
+      <input type="text" name="name" placeholder="e.g. Rahul" required />
+    </label>
+
+    <label>Age <span class="type-note">→ int variable</span>
+      <input type="number" name="age" placeholder="e.g. 25" required />
+    </label>
+
+    <label>Height (cm) <span class="type-note">→ float variable</span>
+      <input type="number" step="0.1" name="height" placeholder="e.g. 170.5" required />
+    </label>
+
+    <label>Hobbies <span class="type-note">→ list variable (comma-separated)</span>
+      <input type="text" name="hobbies" placeholder="e.g. reading, coding, music" />
+    </label>
+
+    <div class="checkbox-row">
+      <input type="checkbox" name="is_student" id="is_student" />
+      <label for="is_student" style="margin:0;">Currently a student? <span class="type-note">→ bool variable</span></label>
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  {% if result %}
+  <div class="result">
+    <h2>Output — Profile Dictionary</h2>
+    <table>
+      <tr><td>name</td><td>{{ result.name }} <span class="type-note">str</span></td></tr>
+      <tr><td>age</td><td>{{ result.age }} <span class="type-note">int</span></td></tr>
+      <tr><td>height_cm</td><td>{{ result.height_cm }} <span class="type-note">float</span></td></tr>
+      <tr><td>is_student</td>
+          <td>
+            {% if result.is_student %}
+              <span class="badge yes">True</span>
+            {% else %}
+              <span class="badge no">False</span>
+            {% endif %}
+            <span class="type-note">bool</span>
+          </td>
+      </tr>
+      <tr><td>hobbies</td>
+          <td>
+            {% for h in result.hobbies %}<span class="tag">{{ h }}</span>{% endfor %}
+            <span class="type-note">list ({{ result.hobby_count }} items)</span>
+          </td>
+      </tr>
+      <tr><td>profile</td><td><span class="type-note">dict — contains all above</span></td></tr>
+    </table>
+  </div>
+  {% endif %}
+</div>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>05 – Classes</title>
+  <style>
+    body        { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    .container  { max-width: 800px; margin: auto; background: #fff; padding: 30px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h1          { color: #2c3e50; border-bottom: 2px solid #e74c3c; padding-bottom: 10px; }
+    label       { display: block; margin-top: 12px; font-weight: bold; color: #333; font-size: 0.9rem; }
+    input[type="text"],
+    input[type="number"] { width: 100%; padding: 7px; margin-top: 3px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .grid       { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .checkbox-row { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+    button      { margin-top: 20px; padding: 10px 24px; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #c0392b; }
+    .concept    { background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 12px; margin-bottom: 20px; font-size: 0.9rem; }
+    .section    { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; padding: 14px; margin-top: 16px; }
+    .cls-label  { font-size: 0.78rem; background: #e74c3c; color: #fff; padding: 2px 8px; border-radius: 3px; margin-bottom: 8px; display: inline-block; }
+    .output     { font-size: 0.95rem; color: #2c3e50; margin-top: 6px; line-height: 1.7; }
+    .output strong { color: #e74c3c; }
+    .kv         { margin-top: 6px; }
+    .kv div     { padding: 4px 0; border-bottom: 1px solid #eee; font-size: 0.88rem; }
+    .kv div span:first-child { font-weight: bold; color: #555; display: inline-block; min-width: 120px; }
+    .tag        { display: inline-block; background: #fadbd8; color: #922b21; padding: 2px 8px; border-radius: 3px; margin: 2px; font-size: 0.82rem; }
+    .badge      { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 0.82rem; }
+    .badge.yes  { background: #d4edda; color: #155724; }
+    .badge.no   { background: #f8d7da; color: #721c24; }
+    .type-note  { font-size: 0.76rem; color: #888; font-weight: normal; margin-left: 5px; }
+    h3          { color: #e74c3c; font-size: 0.95rem; margin: 0 0 8px 0; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Python Project 05 — Classes & OOP</h1>
+
+  <div class="concept">
+    <strong>Concepts shown:</strong>
+    <code>class</code>, <code>__init__</code>, instance/class variables, inheritance, method overriding, <code>super()</code>, <code>isinstance()</code>.
+  </div>
+
+  <form method="POST">
+
+    <h3 style="margin-top:16px;">🐶 Dog (inherits Animal)</h3>
+    <div class="grid">
+      <label>Dog Name <span class="type-note">→ self.name</span>
+        <input type="text" name="dog_name" value="Buddy" />
+      </label>
+      <label>Breed <span class="type-note">→ Dog-specific attribute</span>
+        <input type="text" name="dog_breed" value="Labrador" />
+      </label>
+    </div>
+    <label>Teach a trick <span class="type-note">→ learn_trick()</span>
+      <input type="text" name="dog_trick" value="sit" />
+    </label>
+
+    <h3 style="margin-top:16px;">🐱 Cat (inherits Animal)</h3>
+    <div class="grid">
+      <label>Cat Name
+        <input type="text" name="cat_name" value="Whiskers" />
+      </label>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" name="cat_indoor" id="cat_indoor" checked />
+      <label for="cat_indoor" style="margin:0;">Indoor cat? <span class="type-note">→ instance variable</span></label>
+    </div>
+
+    <h3 style="margin-top:16px;">🏦 BankAccount (class variable demo)</h3>
+    <div class="grid">
+      <label>Owner Name
+        <input type="text" name="owner" value="Alice" />
+      </label>
+      <label>Starting Balance (₹)
+        <input type="number" name="balance" value="1000" />
+      </label>
+      <label>Deposit Amount (₹)
+        <input type="number" name="deposit" value="500" />
+      </label>
+      <label>Withdraw Amount (₹)
+        <input type="number" name="withdraw" value="200" />
+      </label>
+    </div>
+
+    <button type="submit">Create Objects</button>
+  </form>
+
+  {% if results %}
+
+  <div class="section">
+    <span class="cls-label">class Dog(Animal) — Inheritance + Override</span>
+    <div class="output">{{ results.dog.speak }}</div>
+    <div class="output">{{ results.dog.fetch }}</div>
+    <div class="kv" style="margin-top:8px;">
+      <div><span>name</span>{{ results.dog.info.name }}</div>
+      <div><span>species</span>{{ results.dog.info.species }}</div>
+      <div><span>breed</span>{{ results.dog.breed }}</div>
+      <div><span>tricks</span>{% for t in results.dog.info.tricks %}<span class="tag">{{ t }}</span>{% endfor %}</div>
+      <div><span>isinstance(Dog, Animal)</span><span class="badge yes">{{ results.dog.is_dog }}</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="cls-label">class Cat(Animal) — speak() overridden, info() extended</span>
+    <div class="output">{{ results.cat.speak }}</div>
+    <div class="kv" style="margin-top:8px;">
+      <div><span>name</span>{{ results.cat.info.name }}</div>
+      <div><span>species</span>{{ results.cat.info.species }}</div>
+      <div><span>indoor</span>
+        {% if results.cat.info.indoor %}
+          <span class="badge yes">True</span>
+        {% else %}
+          <span class="badge no">False</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="cls-label">class BankAccount — class variable: bank_name, total_accounts</span>
+    <div class="kv">
+      <div><span>owner</span>{{ results.bank.owner }}</div>
+      <div><span>bank</span>{{ results.bank.bank }}</div>
+      <div><span>balance</span>₹ {{ results.bank.balance }}</div>
+      <div><span>history</span>{% for h in results.bank.history %}<span class="tag">{{ h }}</span>{% endfor %}</div>
+      <div><span>total_accounts</span><strong>{{ results.total_accounts }}</strong> (class variable, shared)</div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+</body>
+</html>

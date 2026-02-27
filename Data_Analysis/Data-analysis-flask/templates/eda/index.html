@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}04 — EDA{% endblock %}
+{% block content %}
+<h1 style="font-size:1.4rem; color:#1a1a2e; margin-bottom:6px;">04 — EDA & Distributions</h1>
+<div class="concept">
+  <strong>Concepts:</strong> Univariate analysis · Histogram + KDE · Boxplot · Bivariate scatter · Correlation heatmap · Skewness · Normality
+</div>
+
+<div class="grid-2">
+
+  <!-- Univariate Numerical -->
+  <div class="card">
+    <h2>Univariate — Numerical Column</h2>
+    <div>
+      <label>Select column</label>
+      <select id="uni-col" onchange="doUnivariate()">
+        <option value="salary">Salary</option>
+        <option value="age">Age</option>
+        <option value="experience">Experience</option>
+      </select>
+    </div>
+    <div id="uni-result" class="result-box hidden"></div>
+    <div id="uni-hist"></div>
+  </div>
+
+  <!-- Univariate Categorical -->
+  <div class="card">
+    <h2>Univariate — Categorical Column</h2>
+    <div>
+      <label>Select column</label>
+      <select id="cat-col" onchange="doCategorical()">
+        <option value="department">Department</option>
+        <option value="gender">Gender</option>
+        <option value="education">Education</option>
+      </select>
+    </div>
+    <div id="cat-result" class="result-box hidden"></div>
+  </div>
+
+  <!-- Bivariate -->
+  <div class="card">
+    <h2>Bivariate Analysis</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:10px;">Scatter plot + Pearson correlation <code>r</code></p>
+    <div class="row">
+      <div>
+        <label>X axis</label>
+        <select id="biv-x">
+          <option value="experience">Experience</option>
+          <option value="age">Age</option>
+        </select>
+      </div>
+      <div>
+        <label>Y axis</label>
+        <select id="biv-y">
+          <option value="salary">Salary</option>
+          <option value="rating">Rating</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button onclick="doBivariate()">▶ Analyze</button>
+    </div>
+    <div id="biv-result" class="result-box hidden"></div>
+  </div>
+
+  <!-- Correlation Heatmap -->
+  <div class="card">
+    <h2>Correlation Heatmap</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:10px;">Pearson r between numerical columns</p>
+    <div class="btn-row">
+      <button onclick="doCorr()">▶ Show Heatmap</button>
+    </div>
+    <div id="corr-result" class="result-box hidden"></div>
+  </div>
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function doUnivariate() {
+  const d = await post('/api/eda/univariate', {col: val('uni-col')});
+  show('uni-result');
+  html('uni-result', `<div class="stat-grid">
+    <div class="stat-item"><div class="val">${d.mean}</div><div class="lbl">Mean</div></div>
+    <div class="stat-item"><div class="val">${d.median}</div><div class="lbl">Median</div></div>
+    <div class="stat-item"><div class="val">${d.std}</div><div class="lbl">Std Dev</div></div>
+    <div class="stat-item"><div class="val">${d.skew}</div><div class="lbl">Skewness</div></div>
+    <div class="stat-item"><div class="val">${d.min}</div><div class="lbl">Min</div></div>
+    <div class="stat-item"><div class="val">${d.max}</div><div class="lbl">Max</div></div>
+  </div>
+  <p style="margin-top:8px; font-size:0.82rem;">Distribution: <span class="badge ${d.skew_label==='Symmetric'?'badge-green':'badge-yellow'}">${d.skew_label}</span></p>`);
+
+  // Draw inline histogram
+  const max = Math.max(...d.hist);
+  const bars = d.hist.map((v,i) =>
+    `<div style="display:inline-block; width:${Math.floor(100/d.hist.length)-1}%; background:#e94560; height:${Math.round(v/max*80)}px; vertical-align:bottom; margin:0 0.5%;"></div>`
+  ).join('');
+  html('uni-hist', `<div style="border:1px solid #eee; padding:10px; margin-top:8px; height:100px; display:flex; align-items:flex-end;">${bars}</div>`);
+}
+
+async function doCategorical() {
+  const d = await post('/api/eda/categorical', {col: val('cat-col')});
+  show('cat-result');
+  const items = d.labels.map((l,i) => ({label:l, value:d.values[i]}));
+  html('cat-result', barChart(items, 'label', 'value'));
+}
+
+async function doBivariate() {
+  const d = await post('/api/eda/bivariate', {x: val('biv-x'), y: val('biv-y')});
+  show('biv-result');
+  const strength = Math.abs(d.r) > 0.7 ? 'Strong' : Math.abs(d.r) > 0.3 ? 'Moderate' : 'Weak';
+  const dir = d.r > 0 ? 'Positive' : 'Negative';
+  html('biv-result', `
+    <div class="stat-grid">
+      <div class="stat-item"><div class="val">${d.r}</div><div class="lbl">Pearson r</div></div>
+      <div class="stat-item"><div class="val">${d.slope}</div><div class="lbl">Slope</div></div>
+    </div>
+    <p style="margin-top:8px; font-size:0.85rem;">Relationship: <span class="badge badge-blue">${strength} ${dir}</span></p>
+    <p style="font-size:0.8rem; color:#666; margin-top:6px;">Scatter sample: ${d.x.slice(0,5).map((x,i)=>`(${x}, ${d.y[i]})`).join(' | ')} ...</p>
+  `);
+}
+
+async function doCorr() {
+  const d = await get('/api/eda/correlation');
+  show('corr-result');
+  const colors = v => {
+    const abs = Math.abs(v);
+    if (abs > 0.7) return v>0 ? '#c0392b' : '#2980b9';
+    if (abs > 0.3) return v>0 ? '#e74c3c80' : '#3498db80';
+    return '#f8f9fa';
+  };
+  const txtColor = v => Math.abs(v) > 0.3 ? '#fff' : '#333';
+  let table = `<div class="tbl-wrap"><table><tr><th></th>${d.cols.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+  d.matrix.forEach((row,i) => {
+    table += `<tr><td><strong>${d.cols[i]}</strong></td>`;
+    row.forEach((v,j) => {
+      table += `<td style="background:${colors(v)};color:${txtColor(v)};text-align:center;font-size:0.8rem;">${v}</td>`;
+    });
+    table += '</tr>';
+  });
+  table += '</table></div>';
+  html('corr-result', table);
+}
+
+doUnivariate(); doCategorical(); doCorr();
+</script>
+{% endblock %}
